@@ -37,7 +37,7 @@ function sendCode() {
   const code = generateCode();
   const currentDate = getCurrentDate();
   const mailOptions = {
-    from: `Access Code <>`,
+    from: `Access Code <odamie3@gmail.com>`,
     to: "itedoestate506@gmail.com",
     subject: "ACCESS CODE",
     text: `SPECIAL ANNOUNCEMENT! NEW CODE
