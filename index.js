@@ -17,6 +17,12 @@ function generateCode() {
   return code;
 }
 
+function getCurrentTime(hour) {
+  const ampm = hour < 12 ? 'AM' : 'PM';
+  const hour12 = hour % 12 === 0 ? 12 : hour % 12;
+  return `${hour12} ${ampm}`;
+}
+
 function getCurrentDate() {
   const date = new Date();
   const day = String(date.getDate()).padStart(2, "0");
@@ -33,14 +39,14 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-function sendCode() {
+function sendCode(time) {
   const code = generateCode();
   const currentDate = getCurrentDate();
   const mailOptions = {
     from: `Access Code <odamie3@gmail.com>`,
     to: "itedoestate506@gmail.com",
     subject: "ACCESS CODE",
-    text: `SPECIAL ANNOUNCEMENT! NEW CODE
+    text: `SPECIAL ANNOUNCEMENT! NEW CODE FROM ${time}
 
         Dear all
 
@@ -64,8 +70,11 @@ function sendCode() {
   });
 }
 
-cron.schedule("0 0,6 * * *", () => {
-  sendCode();
+cron.schedule("0 0,12,18 * * *", () => {
+  const date = new Date();
+  const hour = date.getHours();
+  const time = getCurrentTime(hour);
+  sendCode(time);
 });
 
 const port = 3000;
