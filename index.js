@@ -70,7 +70,7 @@ function sendCode(time) {
   });
 }
 
-cron.schedule("*/5 * * * *", () => {
+cron.schedule("0 0,12,18 * * *", () => {
   const date = new Date();
   console.log(`Cron job executed at ${date.toISOString()}`);
   const hour = date.getHours();
