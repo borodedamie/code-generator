@@ -70,11 +70,15 @@ function sendCode(time) {
   });
 }
 
-cron.schedule("0 0,12,18 * * *", () => {
+cron.schedule("*/5 * * * *", () => {
   const date = new Date();
+  console.log(`Cron job executed at ${date.toISOString()}`);
   const hour = date.getHours();
   const time = getCurrentTime(hour);
+  console.log(`Sending email at ${time}`);
   sendCode(time);
+}, {
+  timezone: "Africa/Lagos"
 });
 
 const port = 3000;
