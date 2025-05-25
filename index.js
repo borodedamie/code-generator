@@ -77,7 +77,4 @@ cron.schedule("0 0,12,18 * * *", () => {
 const port = 3000;
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
-  const time = getCurrentTime();
-  console.log(`Sending email at ${time}`);
-  sendCode(time);
 });
