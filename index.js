@@ -2,6 +2,7 @@ import express from "express";
 import nodemailer from "nodemailer";
 import cron from "node-cron";
 import dotenv from "dotenv";
+import moment from "moment-timezone";
 
 dotenv.config();
 
@@ -17,18 +18,12 @@ function generateCode() {
   return code;
 }
 
-function getCurrentTime(hour) {
-  const ampm = hour < 12 ? 'AM' : 'PM';
-  const hour12 = hour % 12 === 0 ? 12 : hour % 12;
-  return `${hour12} ${ampm}`;
+function getCurrentTime() {
+  return moment.tz("Africa/Lagos").format("h A");
 }
 
 function getCurrentDate() {
-  const date = new Date();
-  const day = String(date.getDate()).padStart(2, "0");
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const year = String(date.getFullYear()).slice(2);
-  return `${day}/${month}/${year}`;
+  return moment.tz("Africa/Lagos").format("DD/MM/YY");
 }
 
 const transporter = nodemailer.createTransport({
@@ -43,10 +38,11 @@ function sendCode(time) {
   const code = generateCode();
   const currentDate = getCurrentDate();
   const mailOptions = {
-    from: `Access Code <odamie3@gmail.com>`,
+    from: `Access Code <>`,
     to: "itedoestate506@gmail.com",
     subject: "ACCESS CODE",
-    text: `SPECIAL ANNOUNCEMENT! NEW CODE FROM ${time}
+    text: `
+        SPECIAL ANNOUNCEMENT! NEW CODE FROM ${time}
 
         Dear all
 
@@ -71,10 +67,7 @@ function sendCode(time) {
 }
 
 cron.schedule("0 0,12,18 * * *", () => {
-  const date = new Date();
-  console.log(`Cron job executed at ${date.toISOString()}`);
-  const hour = date.getHours();
-  const time = getCurrentTime(hour);
+  const time = getCurrentTime();
   console.log(`Sending email at ${time}`);
   sendCode(time);
 }, {
@@ -84,4 +77,7 @@ cron.schedule("0 0,12,18 * * *", () => {
 const port = 3000;
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
+  const time = getCurrentTime();
+  console.log(`Sending email at ${time}`);
+  sendCode(time);
 });
