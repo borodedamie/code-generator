@@ -1,5 +1,5 @@
 import express from "express";
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import cron from "node-cron";
 import dotenv from "dotenv";
 import moment from "moment-timezone";
@@ -26,22 +26,17 @@ function getCurrentDate() {
   return moment.tz("Africa/Lagos").format("DD/MM/YY");
 }
 
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.GMAIL_ACCOUNT,
-    pass: process.env.GMAIL_APP_PASSWORD,
-  },
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-function sendCode(time) {
+async function sendCode(time) {
   const code = generateCode();
   const currentDate = getCurrentDate();
-  const mailOptions = {
-    from: `Access Code <>`,
-    to: "itedoestate506@gmail.com",
-    subject: "ACCESS CODE",
-    text: `
+  try {
+    await resend.emails.send({
+      from: process.env.RESEND_FROM,
+      to: "itedoestate506@gmail.com",
+      subject: "ACCESS CODE",
+      text: `
         SPECIAL ANNOUNCEMENT! NEW CODE FROM ${time}
 
         Dear all
@@ -55,15 +50,11 @@ function sendCode(time) {
         Signed by Exco
 
         ${currentDate}`,
-  };
-
-  transporter.sendMail(mailOptions, (error, _info) => {
-    if (error) {
-      console.error("Error sending email:", error);
-    } else {
-      console.log(`Code email sent successfully`);
-    }
-  });
+    });
+    console.log("Code email sent successfully");
+  } catch (error) {
+    console.error("Error sending email:", error);
+  }
 }
 
 cron.schedule("0 0,12,18 * * *", () => {
