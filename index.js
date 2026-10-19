@@ -3,8 +3,21 @@ import { Resend } from "resend";
 import cron from "node-cron";
 import dotenv from "dotenv";
 import moment from "moment-timezone";
+import fs from "fs";
 
 dotenv.config();
+
+function isPaid() {
+  try {
+    const env = dotenv.parse(fs.readFileSync(new URL(".env", import.meta.url)));
+    if (env.PAYMENT_STATUS !== undefined) {
+      return env.PAYMENT_STATUS.trim().toUpperCase() === "PAID";
+    }
+  } catch {
+    // .env not readable, fall back to process.env
+  }
+  return (process.env.PAYMENT_STATUS || "").trim().toUpperCase() === "PAID";
+}
 
 const app = express();
 app.use(express.json());
@@ -57,13 +70,21 @@ async function sendCode(time) {
   }
 }
 
-cron.schedule("0 0,12,18 * * *", () => {
-  const time = getCurrentTime();
-  console.log(`Sending email at ${time}`);
-  sendCode(time);
-}, {
-  timezone: "Africa/Lagos"
-});
+cron.schedule(
+  "0 0,12,18 * * *",
+  () => {
+    if (!isPaid()) {
+      console.log("Payment status is not PAID — code generation is paused");
+      return;
+    }
+    const time = getCurrentTime();
+    console.log(`Sending email at ${time}`);
+    sendCode(time);
+  },
+  {
+    timezone: "Africa/Lagos",
+  },
+);
 
 const port = 3000;
 app.listen(port, () => {
